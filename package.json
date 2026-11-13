@@ -1,7 +1,7 @@
 {
   "name": "@civ-clone/base-city-happiness",
   "version": "0.1.0",
-  "description": "Works out the mood of each of a city's citizens from its Happiness, Unhappiness and specialists.",
+  "description": "Works out the mood of each of a city's citizens from its Happiness, Unhappiness and specialists, and whether a city is in civil disorder.",
   "repository": "git@github.com:civ-clone/base-city-happiness.git",
   "keywords": [
     "typescript",
@@ -32,6 +32,8 @@
     "@civ-clone/base-city-yield-unhappiness": "^0.1.1",
     "@civ-clone/core-city": "^0.1.24",
     "@civ-clone/core-city-growth": "^0.1.6",
+    "@civ-clone/core-city-happiness": "^0.1.2",
+    "@civ-clone/core-rule": "^0.1.9",
     "@civ-clone/core-yield": "^0.1.6"
   }
 }
