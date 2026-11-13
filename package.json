@@ -1,6 +1,6 @@
 {
   "name": "@civ-clone/base-city-happiness",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Works out the mood of each of a city's citizens from its Happiness, Unhappiness and specialists, and whether a city is in civil disorder.",
   "repository": "git@github.com:civ-clone/base-city-happiness.git",
   "keywords": [
