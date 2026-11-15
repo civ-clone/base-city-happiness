@@ -162,6 +162,63 @@ describe('calculateStagedCitizenState', (): void => {
     ]);
   });
 
+  it("applies a stage's steps in order, so a reset can come before a content effect", (): void => {
+    // Civ2's wonders stage with Shakespeare's Theatre and J.S. Bach's, size 8, 6 unhappy to begin with, 2 luxuries'
+    //  happy citizens: the unhappy set to none, then Bach's 2 content effects find none left.
+    const reset = (counts: IStagedCounts): IStagedCounts => ({
+        ...counts,
+        unhappy: 0,
+      }),
+      inOrder = calculateStagedCitizenState({
+        size: 8,
+        unhappy: 6,
+        stages: [
+          { name: 'luxuries', happy: 2 },
+          { name: 'wonders', steps: [{ apply: reset }, { content: 2 }] },
+        ],
+      }),
+      // The stage's own fields come before its `apply`: Bach's first, then the reset.
+      ownFields = calculateStagedCitizenState({
+        size: 8,
+        unhappy: 6,
+        stages: [
+          { name: 'luxuries', happy: 2 },
+          { name: 'wonders', content: 2, apply: reset },
+        ],
+      });
+
+    expect(byStage(inOrder.stages as any)).eql([
+      ['base', 0, 6, 0],
+      ['luxuries', 2, 6, 0],
+      // unhappy 0 - 2 = -2, clamped to 0.
+      ['wonders', 2, 0, 0],
+    ]);
+    expect(byStage(ownFields.stages as any)).eql([
+      ['base', 0, 6, 0],
+      ['luxuries', 2, 6, 0],
+      ['wonders', 2, 0, 0],
+    ]);
+
+    // With an angry citizen the order shows: the reset leaves it to come back as unhappy, and Bach's then quiets it.
+    const angry = (steps: any) =>
+      byStage(
+        calculateStagedCitizenState({
+          size: 8,
+          unhappy: 10,
+          stages: [{ name: 'wonders', ...steps }],
+        }).stages as any
+      );
+
+    expect(angry({ steps: [{ apply: reset }, { content: 2 }] })).eql([
+      ['base', 0, 8, 2],
+      ['wonders', 0, 0, 0],
+    ]);
+    expect(angry({ content: 2, apply: reset })).eql([
+      ['base', 0, 8, 2],
+      ['wonders', 0, 2, 0],
+    ]);
+  });
+
   it('leaves none unhappy or angry for a stage that clears both', (): void => {
     // As Fundamentalism does in Civ2.
     const result = calculateStagedCitizenState({

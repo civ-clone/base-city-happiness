@@ -9,18 +9,27 @@ export interface IStagedCounts {
   angry: number;
 }
 /**
- * One stage of a ruleset's happiness, applied to the counts so far, in this order: `unhappy` more unhappy citizens,
- * `content` fewer (each content effect), `happy` more happy ones, then `apply`, for a stage that does something other
- * than add or take away (a government with no unhappy citizens, or units that each quiet one unhappy citizen but no
- * more than there are). The counts are clamped after each stage.
+ * One change to the counts: `unhappy` more unhappy citizens, `content` fewer (each content effect), `happy` more happy
+ * ones, then `apply`, for a change other than adding or taking away (a government with no unhappy citizens, or units
+ * that each quiet one unhappy citizen but no more than there are), in that order.
  */
-export interface IHappinessStage {
-  /** What the stage is, for a report of the stages: 'luxuries', 'buildings', or whatever the ruleset likes. */
-  name: string;
+export interface IHappinessStep {
   happy?: number;
   content?: number;
   unhappy?: number;
   apply?: (counts: IStagedCounts) => IStagedCounts;
+}
+/**
+ * One stage of a ruleset's happiness: its own change (`happy`, `content`, `unhappy`, then `apply`), then each of its
+ * `steps` in order, for a stage whose effects must follow one another. The counts are clamped after the whole stage,
+ * not between its steps. In Civ2's wonders stage, Shakespeare's Theatre sets the unhappy to none before J.S. Bach's
+ * takes 2 away: `steps: [{ apply: (counts) => ({ ...counts, unhappy: 0 }) }, { content: 2 }]`. Given as
+ * `{ content: 2, apply: … }` instead, Bach's would come first and be lost to the reset.
+ */
+export interface IHappinessStage extends IHappinessStep {
+  /** What the stage is, for a report of the stages: 'luxuries', 'buildings', or whatever the ruleset likes. */
+  name: string;
+  steps?: IHappinessStep[];
 }
 /** The counts after one stage, as a city screen shows them stage by stage. */
 export interface IStagedCountsByStage extends IStagedCounts {
