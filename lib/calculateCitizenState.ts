@@ -8,10 +8,16 @@ import Unhappiness from '@civ-clone/base-city-yield-unhappiness/Unhappiness';
 import { reduceYields } from '@civ-clone/core-yield/lib/reduceYields';
 import Yield from '@civ-clone/core-yield/Yield';
 
+/**
+ * A citizen's mood. `Angry` is an unhappy citizen beyond what the city's size allows for, which a ruleset that has them
+ *  counts among its unhappy citizens (see `lib/calculateStagedCitizenState`). `calculateCitizenState` never gives it.
+ *  Last, so the other three keep their values.
+ */
 export enum CitizenState {
   Unhappy,
   Content,
   Happy,
+  Angry,
 }
 
 /**
@@ -70,23 +76,31 @@ export const calculateCitizenState = (
   return state;
 };
 
-export type CitizenMood = 'unhappy' | 'content' | 'happy';
+export type CitizenMood = 'unhappy' | 'content' | 'happy' | 'angry';
 
 /** The name a renderer is sent for a `CitizenState`. */
 export const citizenMood = (citizenState: CitizenState): CitizenMood =>
-  (['unhappy', 'content', 'happy'] as CitizenMood[])[citizenState];
+  (['unhappy', 'content', 'happy', 'angry'] as CitizenMood[])[citizenState];
 
-/** How many citizens are `[unhappy, content, happy]`. */
+/** How many citizens are `[unhappy, content, happy]`. An angry citizen is unhappy too: `angryCount` says how many are. */
 export const citizenSummary = (
   state: CitizenState[]
 ): [number, number, number] =>
   state.reduce(
     ([unhappy, content, happy], citizenState) => [
-      unhappy + (citizenState === CitizenState.Unhappy ? 1 : 0),
+      unhappy +
+        (citizenState === CitizenState.Unhappy ||
+        citizenState === CitizenState.Angry
+          ? 1
+          : 0),
       content + (citizenState === CitizenState.Content ? 1 : 0),
       happy + (citizenState === CitizenState.Happy ? 1 : 0),
     ],
     [0, 0, 0]
   );
+
+/** How many of the citizens are angry. */
+export const angryCount = (state: CitizenState[]): number =>
+  state.filter((citizenState) => citizenState === CitizenState.Angry).length;
 
 export default calculateCitizenState;
