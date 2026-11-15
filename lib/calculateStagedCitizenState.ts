@@ -45,7 +45,10 @@ const applyStep = (
     unhappy: counts.unhappy + (step.unhappy ?? 0) - (step.content ?? 0),
   };
 
-  return step.apply ? step.apply({ ...changed }) : changed;
+  const applied = step.apply ? step.apply({ ...changed }) : changed;
+
+  // An `apply` can't make citizens less than not angry.
+  return applied.angry < 0 ? { ...applied, angry: 0 } : applied;
 };
 
 /** The counts after one stage, as a city screen shows them stage by stage. */
@@ -93,7 +96,7 @@ const clampStage = (
 ): IStagedCounts => {
   happy = clamp(happy, 0, size);
 
-  while (angry !== 0 && unhappy < angry) {
+  while (angry > 0 && unhappy < angry) {
     angry--;
     unhappy++;
   }
@@ -103,7 +106,7 @@ const clampStage = (
   const working = clamp(size - specialists, 0, 99);
 
   while (unhappy + happy > working) {
-    if (angry === 0) {
+    if (angry <= 0) {
       happy = clamp(happy - 1, 0, size);
     } else {
       angry--;
@@ -112,7 +115,7 @@ const clampStage = (
     unhappy = clamp(unhappy - 1, 0, size);
   }
 
-  while (angry !== 0 && unhappy + happy < size - specialists) {
+  while (angry > 0 && unhappy + happy < size - specialists) {
     angry--;
     unhappy++;
   }

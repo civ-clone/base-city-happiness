@@ -219,6 +219,31 @@ describe('calculateStagedCitizenState', (): void => {
     ]);
   });
 
+  it('treats a stage that leaves fewer than no angry citizens as none, and still ends', (): void => {
+    // Size 6 with 2 specialists, so 4 work: 6 happy and -1 angry from an `apply` used to loop for ever.
+    const result = calculateStagedCitizenState({
+      size: 6,
+      specialists: 2,
+      unhappy: 0,
+      stages: [
+        {
+          name: 'wonders',
+          apply: (counts: IStagedCounts): IStagedCounts => ({
+            ...counts,
+            happy: 6,
+            angry: -1,
+          }),
+        },
+      ],
+    });
+
+    expect(byStage(result.stages as any)).eql([
+      ['base', 0, 0, 0],
+      ['wonders', 4, 0, 0],
+    ]);
+    expect(result.states).eql([Happy, Happy, Happy, Happy]);
+  });
+
   it('leaves none unhappy or angry for a stage that clears both', (): void => {
     // As Fundamentalism does in Civ2.
     const result = calculateStagedCitizenState({
