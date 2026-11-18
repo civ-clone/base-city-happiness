@@ -26,5 +26,8 @@ Works out the mood of each of a city's working citizens, for a ruleset's civil d
   `calculateCitizenState` is unchanged: a ruleset chooses the one it uses.
 - `lib/civilDisorder`: `inCivilDisorder(city, yields, ruleRegistry?)`, whether any of the ruleset's `CivilDisorder`
   rules says the city is in disorder, for the rules that stop what a city produces while it is.
+- `Rules/BornContent` and `lib/bornContent`: `bornContent(city, ruleRegistry)`, how many of the city's citizens are
+  born content by the ruleset's `BornContent` rules (the fewest any gives), or `null` when none answers, for a player
+  or its AI to see what one more citizen would be. A ruleset that numbers it per city registers the rule.
 
 A library: it registers no rules. See `civ1-city-happiness` for Civilization's rules that use it.
